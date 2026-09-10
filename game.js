@@ -180,6 +180,161 @@ class ShootingStar extends Asteroid {
   }
 }
 
+// ── Skins de la nave ──────────────────────────────────────────────────────────
+// Cada skin define cómo se dibuja el cuerpo y la llama del propulsor.
+// Reciben el contexto con translate/rotate ya aplicados en la posición de la nave.
+const SKINS = [
+  {
+    name: 'Clásico',
+    drawBody(ctx) {
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth   = 1.5;
+      ctx.lineJoin    = 'round';
+      ctx.beginPath();
+      ctx.moveTo( 20,  0);
+      ctx.lineTo(-12, -9);
+      ctx.lineTo( -7,  0);
+      ctx.lineTo(-12,  9);
+      ctx.closePath();
+      ctx.stroke();
+    },
+    drawFlame(ctx, ship) {
+      const boosted = ship.speedBoost > 0;
+      if (Math.random() > (boosted ? 0.15 : 0.35)) {
+        ctx.beginPath();
+        ctx.moveTo(-8, -4);
+        ctx.lineTo(-8 - rand(6, boosted ? 26 : 14), 0);
+        ctx.lineTo(-8,  4);
+        ctx.strokeStyle = boosted ? 'rgba(80, 220, 255, 0.9)' : 'rgba(255, 130, 0, 0.85)';
+        ctx.stroke();
+      }
+    },
+  },
+  {
+    name: 'Delta',
+    drawBody(ctx) {
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth   = 1.5;
+      ctx.lineJoin    = 'round';
+      ctx.beginPath();
+      ctx.moveTo( 24,  0);
+      ctx.lineTo(-14, -8);
+      ctx.lineTo( -5, -2);
+      ctx.lineTo( -5,  2);
+      ctx.lineTo(-14,  8);
+      ctx.closePath();
+      ctx.stroke();
+      // Línea de estela central
+      ctx.beginPath();
+      ctx.moveTo( 14, 0);
+      ctx.lineTo(-5,  0);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.lineWidth   = 1;
+      ctx.stroke();
+    },
+    drawFlame(ctx, ship) {
+      const boosted = ship.speedBoost > 0;
+      if (Math.random() > (boosted ? 0.15 : 0.35)) {
+        ctx.beginPath();
+        ctx.moveTo(-7, -3);
+        ctx.lineTo(-7 - rand(6, boosted ? 28 : 16), 0);
+        ctx.lineTo(-7,  3);
+        ctx.strokeStyle = boosted ? 'rgba(220, 80, 255, 0.9)' : 'rgba(80, 220, 255, 0.9)';
+        ctx.lineWidth   = 1.5;
+        ctx.stroke();
+      }
+    },
+  },
+  {
+    name: 'Fantasmal',
+    drawBody(ctx) {
+      ctx.save();
+      ctx.shadowColor = '#7df';
+      ctx.shadowBlur  = 12;
+      ctx.fillStyle   = 'rgba(120, 220, 255, 0.18)';
+      ctx.strokeStyle = 'rgba(180, 240, 255, 0.95)';
+      ctx.lineWidth   = 1.5;
+      ctx.lineJoin    = 'round';
+      ctx.beginPath();
+      ctx.moveTo( 20,  0);
+      ctx.lineTo(-12, -9);
+      ctx.lineTo( -7,  0);
+      ctx.lineTo(-12,  9);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+    },
+    drawFlame(ctx, ship) {
+      const boosted = ship.speedBoost > 0;
+      if (Math.random() > (boosted ? 0.15 : 0.35)) {
+        ctx.beginPath();
+        ctx.moveTo(-8, -3);
+        ctx.lineTo(-8 - rand(6, boosted ? 24 : 13), 0);
+        ctx.lineTo(-8,  3);
+        ctx.strokeStyle = boosted ? 'rgba(255, 255, 255, 0.95)' : 'rgba(140, 230, 255, 0.8)';
+        ctx.lineWidth   = 1.5;
+        ctx.stroke();
+      }
+    },
+  },
+  {
+    name: 'Guerrero',
+    drawBody(ctx) {
+      ctx.save();
+      ctx.fillStyle   = '#1a202a';
+      ctx.strokeStyle = '#ff5a3c';
+      ctx.lineWidth   = 1.5;
+      ctx.lineJoin    = 'round';
+      ctx.beginPath();
+      ctx.moveTo( 16,  0);
+      ctx.lineTo( 10, -7);
+      ctx.lineTo(-16, -11);
+      ctx.lineTo( -8,  0);
+      ctx.lineTo(-16,  11);
+      ctx.lineTo( 10,  7);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      // Filo central
+      ctx.beginPath();
+      ctx.moveTo( 16, 0);
+      ctx.lineTo( -8, 0);
+      ctx.strokeStyle = 'rgba(255, 180, 120, 0.5)';
+      ctx.lineWidth   = 1;
+      ctx.stroke();
+      ctx.restore();
+    },
+    drawFlame(ctx, ship) {
+      const boosted = ship.speedBoost > 0;
+      if (Math.random() > (boosted ? 0.15 : 0.35)) {
+        ctx.beginPath();
+        ctx.moveTo(-10, -5);
+        ctx.lineTo(-10 - rand(6, boosted ? 24 : 13), 0);
+        ctx.lineTo(-10,  5);
+        ctx.strokeStyle = boosted ? 'rgba(255, 140, 80, 0.95)' : 'rgba(255, 90, 40, 0.9)';
+        ctx.lineWidth   = 2;
+        ctx.stroke();
+      }
+    },
+  },
+];
+
+function loadSkinIndex() {
+  try {
+    const n = parseInt(localStorage.getItem('asteroids-skin'), 10);
+    return n >= 0 && n < SKINS.length ? n : 0;
+  } catch { return 0; }
+}
+
+let currentSkinIndex = loadSkinIndex();
+let menuOpen = false;
+
+function selectSkin(i) {
+  currentSkinIndex = ((i % SKINS.length) + SKINS.length) % SKINS.length;
+  try { localStorage.setItem('asteroids-skin', String(currentSkinIndex)); } catch {}
+}
+
 // ── Ship ──────────────────────────────────────────────────────────────────────
 class Ship {
   constructor() { this.reset(); }
@@ -251,29 +406,10 @@ class Ship {
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate(this.angle);
-    ctx.strokeStyle = '#fff';
-    ctx.lineWidth   = 1.5;
-    ctx.lineJoin    = 'round';
 
-    // Silueta clásica: triángulo con muesca trasera
-    ctx.beginPath();
-    ctx.moveTo( 20,  0);   // nariz
-    ctx.lineTo(-12, -9);   // ala izquierda
-    ctx.lineTo( -7,  0);   // muesca trasera
-    ctx.lineTo(-12,  9);   // ala derecha
-    ctx.closePath();
-    ctx.stroke();
-
-    // Llama del propulsor (más larga y cian con el power-up de velocidad)
-    const boosted = this.speedBoost > 0;
-    if (this.thrusting && Math.random() > (boosted ? 0.15 : 0.35)) {
-      ctx.beginPath();
-      ctx.moveTo(-8, -4);
-      ctx.lineTo(-8 - rand(6, boosted ? 26 : 14), 0);
-      ctx.lineTo(-8,  4);
-      ctx.strokeStyle = boosted ? 'rgba(80, 220, 255, 0.9)' : 'rgba(255, 130, 0, 0.85)';
-      ctx.stroke();
-    }
+    const skin = SKINS[currentSkinIndex];
+    skin.drawBody(ctx);
+    if (this.thrusting) skin.drawFlame(ctx, this);
 
     ctx.restore();
   }
@@ -455,7 +591,17 @@ function killShip() {
 }
 
 // ── Update ────────────────────────────────────────────────────────────────────
+function handleMenuKeys() {
+  if (pressed('ArrowLeft'))  selectSkin(currentSkinIndex - 1);
+  if (pressed('ArrowRight')) selectSkin(currentSkinIndex + 1);
+  if (pressed('Enter') || pressed('Space') || pressed('Escape'))
+    menuOpen = false;
+}
+
 function update(dt) {
+  if (pressed('KeyM')) menuOpen = !menuOpen;
+  if (menuOpen) { handleMenuKeys(); return; }
+
   if (state === 'gameover') {
     if (pressed('Space')) initGame();
     particles.forEach(p => p.update(dt));
@@ -632,6 +778,54 @@ function drawOverlay(title, sub) {
   ctx.fillText(sub, W / 2, H / 2 + 22);
 }
 
+function drawMenu() {
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.78)';
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#fff';
+  ctx.font      = 'bold 34px monospace';
+  ctx.fillText('SELECCIONA SKIN', W / 2, 84);
+
+  const BOX = 150;
+  const GAP = 26;
+  const total = SKINS.length * BOX + (SKINS.length - 1) * GAP;
+  let x = (W - total) / 2 + BOX / 2;
+  const y = 258;
+
+  for (let i = 0; i < SKINS.length; i++) {
+    const selected = i === currentSkinIndex;
+
+    ctx.save();
+    // Marco
+    ctx.strokeStyle = selected ? '#fff' : '#4d4d4d';
+    ctx.lineWidth   = selected ? 2.5 : 1.5;
+    if (selected) { ctx.shadowColor = '#fff'; ctx.shadowBlur = 14; }
+    ctx.strokeRect(x - BOX / 2, y - BOX / 2, BOX, BOX);
+    if (selected) ctx.shadowBlur = 0;
+
+    // Preview de la nave
+    ctx.globalAlpha = selected ? 1 : 0.5;
+    ctx.translate(x, y);
+    ctx.rotate(-Math.PI / 2);
+    ctx.scale(2.2, 2.2);
+    SKINS[i].drawBody(ctx);
+    ctx.restore();
+
+    // Nombre
+    ctx.globalAlpha = selected ? 1 : 0.55;
+    ctx.fillStyle   = selected ? '#fff' : '#9a9a9a';
+    ctx.font        = '14px monospace';
+    ctx.fillText(SKINS[i].name, x, y + BOX / 2 + 27);
+
+    x += BOX + GAP;
+  }
+
+  ctx.fillStyle = 'rgba(255,255,255,0.6)';
+  ctx.font      = '13px monospace';
+  ctx.fillText('← →  ELEGIR SKIN     ENTER / ESC / M  CERRAR', W / 2, H - 46);
+}
+
 function draw() {
   ctx.fillStyle = '#000';
   ctx.fillRect(0, 0, W, H);
@@ -647,6 +841,8 @@ function draw() {
 
   if (state === 'gameover')
     drawOverlay('GAME OVER', `PUNTAJE: ${score}   —   ESPACIO PARA REINICIAR`);
+
+  if (menuOpen) drawMenu();
 }
 
 // ── Loop principal ────────────────────────────────────────────────────────────
