@@ -844,26 +844,24 @@ function drawHUD() {
   for (let i = 0; i < lives; i++)
     drawLifeIcon(W - 16 - i * 22, 18);
 
-  // Indicador del power-up de velocidad
+  // Indicadores de power-ups activos
+  let hudY = 46;
   if (ship.speedBoost > 0) {
     ctx.fillStyle = '#4df';
     ctx.textAlign = 'left';
-    ctx.fillText(`VELOCIDAD ${ship.speedBoost.toFixed(1)}s`, 14, 46);
+    ctx.fillText(`VELOCIDAD ${ship.speedBoost.toFixed(1)}s`, 14, hudY);
+    hudY += 18;
   }
-
-  // Indicador del triple disparo
   if (ship.tripleShot > 0) {
     ctx.fillStyle = '#f90';
     ctx.textAlign = 'left';
-    ctx.fillText(`TRIPLE ${ship.tripleShot.toFixed(1)}s`, 14, ship.speedBoost > 0 ? 64 : 64);
+    ctx.fillText(`TRIPLE ${ship.tripleShot.toFixed(1)}s`, 14, hudY);
+    hudY += 18;
   }
-
-  // Indicador del escudo
   if (ship.shieldEnergy > 0) {
     ctx.fillStyle = ship.shieldActive ? '#4f9' : 'rgba(79, 255, 153, 0.6)';
     ctx.textAlign = 'left';
-    ctx.fillText(`ESCUDO ${Math.ceil(ship.shieldEnergy)}%`, 14, ship.speedBoost > 0 ? 86 : 46);
-  }
+    ctx.fillText(`ESCUDO ${Math.ceil(ship.shieldEnergy)}%`, 14, hudY);
   }
 }
 
